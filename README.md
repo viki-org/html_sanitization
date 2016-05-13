@@ -60,7 +60,14 @@ Since the restriction in `bluemonday` rule, we don't check `CSS` rules. It will 
 ```sh
   go get github.com/viki-org/html_sanitization
 ```
-
+* To get policy
+```sh
+	p := html_sanitization.GetPolicy()
+```
+* To do sanitization with string input
+```sh
+	p.Sanitize(htmlIn)
+```
 
 ## Testing
 See sanitize_test.go for some built tests using gspec
