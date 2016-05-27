@@ -1,4 +1,4 @@
-package sanitization
+package sanitize
 import (
 	"github.com/viki-org/gspec"
 	"testing"
