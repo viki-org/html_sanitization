@@ -8,6 +8,8 @@ var elements []string = []string{"b","em","i","strong","u","a","abbr","blockquot
   "ins","main","nav","rp","rt","ruby","section","span","style","summary","sup","table",
   "tbody","td","tfoot","th","thead","title","tr","wbrr"}
 
+//global attributes
+var globalAttributes []string = []string{ "class","dir","hidden","id","lang","style","yabeindex","title","translate"}
 //store attributes will be allowed on relevant element in policy
 var attributes []AllowedAttributesWithElement = []AllowedAttributesWithElement{
     { Element:"a" ,Attributes:[]string{"href","rel","hreflang","name"} },
@@ -33,7 +35,7 @@ var attributes []AllowedAttributesWithElement = []AllowedAttributesWithElement{
 
 //the string regexp that match protocols http or https (only for elements in tagNames)
 var protocol_regexp string = `(http|https):\/\/([\w\-_]+(?:(?:\.[\w\-_]+)+))([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?`
-var protocols_schemes []string = []string{"ftp","http","https","mailto"}
+var protocol_schemes []string = []string{"ftp","http","https","mailto"}
 //store protocols will be allowed in attributes on relevant element in policy
 
 //store tagName recognization for element with allowed only 2 protocol http and https
