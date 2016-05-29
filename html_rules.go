@@ -1,5 +1,18 @@
 package sanitize
 //store elements that will be allowed in policy
+//pair element with attribute allowed
+type AllowedAttributesWithElement struct{
+  Element string
+  Attributes []string
+}
+
+
+//tagName regonization for tag that have protocol policy
+type tagNameReg struct{
+  Open string
+  Close string
+}
+
 var elements []string = []string{"b","em","i","strong","u","a","abbr","blockquote","br",
   "cite","code","dd","dfn","dl","dt","kbd","li","mark","ol","p","pre","q","s",
   "samp","small","strike","sub","sup","time","ul","var","address","article","aside",
