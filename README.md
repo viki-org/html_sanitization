@@ -60,13 +60,13 @@ Since the restriction in `bluemonday` rule, we don't check `CSS` rules. It will 
 ```sh
   go get github.com/viki-org/html_sanitization
 ```
-* To get policy
+* Import to your project
 ```sh
-	p := html_sanitization.GetPolicy()
+	import "github.com/viki-org/html_sanitization"
 ```
 * To do sanitization with string input
 ```sh
-	p.Sanitize(htmlIn)
+	sanitize.Sanitize(htmlIn)
 ```
 
 ## Testing
