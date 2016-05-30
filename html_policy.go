@@ -20,10 +20,7 @@ func init() {
 	htmlPolicy.AllowAttrs(globalAttributes...).Globally()
 
 	for _, attrs := range attributesWithElement {
-		for _, attr := range attrs.Attributes {
-			htmlPolicy.AllowAttrs(attr).OnElements(attrs.Element)
-			// log.Println("allows attr",attributes[j].Attributes[k], " on element ", attributes[j].Element) //for debug
-		}
+		htmlPolicy.AllowAttrs(attrs.Attributes...).OnElements(attrs.Element)
 	}
 
 	//allow relative URL
@@ -38,9 +35,6 @@ func init() {
 	htmlPolicy.AllowAttrs("cite").Matching(regexp.MustCompile(protocol_regexp)).OnElements(tagNameWithTwoProtocols...)
 	htmlPolicy.AllowAttrs("src").Matching(regexp.MustCompile(protocol_regexp)).OnElements("img")
 	//allow more protocols in URL schemes
-	for _, protocol := range protocol_schemes {
-		htmlPolicy.AllowURLSchemes(protocol)
-		// log.Println("allows protocol ",protocols[0].Protocols[i]) //for debug
-	}
+	htmlPolicy.AllowURLSchemes(protocol_schemes...)
 
 }
