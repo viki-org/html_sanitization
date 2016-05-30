@@ -17,6 +17,7 @@ type CssPolicy struct {
 var cssPolicy CssPolicy
 
 func array_copy(arr []string) []string {
+	// Helper function to copy array
 	newArr := make([]string, len(arr))
 	copy(newArr, arr)
 
@@ -38,13 +39,18 @@ func GetCSSPolicy() *CssPolicy {
 }
 
 func (p *CssPolicy) Sanitize(htmlIn string) string {
+	// Sanitize the CSS style of html doc input
 	doc, err := html.Parse(strings.NewReader(htmlIn))
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
+	// After parsing, doc = <html><body> doc </body></html> 
 	doc = p.sanitizeCSSOfHTMLNode(doc).FirstChild.FirstChild.NextSibling
-
+	if doc == nil {
+		log.Println("Nil document after parsing and sanitize")
+		return htmlIn
+	}
 	var htmlOut string
 	for child := doc.FirstChild; child != nil; child = child.NextSibling {
 		var buffer bytes.Buffer
@@ -58,7 +64,7 @@ func (p *CssPolicy) Sanitize(htmlIn string) string {
 }
 
 func (p *CssPolicy) sanitizeCSSOfHTMLNode(node *html.Node) *html.Node {
-	//checking style of each node and each child recursively
+	// Checking style of each node and each child recursively
 	if node.Type == html.ElementNode {
 		var Attrs []html.Attribute
 		for _, attr := range node.Attr {
@@ -80,7 +86,7 @@ func (p *CssPolicy) sanitizeCSSOfHTMLNode(node *html.Node) *html.Node {
 }
 
 func (p *CssPolicy) validateStyle(style string) string {
-	//split style to declaration blocks
+	// Split style to declaration blocks
 	styleArray := strings.Split(style, ";")
 
 	var styleSanitized string = ""
@@ -91,7 +97,7 @@ func (p *CssPolicy) validateStyle(style string) string {
 		//trim trailing space
 		styleEach = strings.TrimSpace(styleEach)
 
-		//take comment out
+		//take comment out of style and save to buffer
 		p.takeCommentOut(styleEach, buffer)
 
 		//no declaration found this string
