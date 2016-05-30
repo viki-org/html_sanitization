@@ -7,12 +7,6 @@ type AllowedAttributesWithElement struct {
 	Attributes []string
 }
 
-//tagName regonization for tag that have protocol policy
-type tagNameReg struct {
-	Open  string
-	Close string
-}
-
 var elements []string = []string{"b", "em", "i", "strong", "u", "a", "abbr", "blockquote", "br",
 	"cite", "code", "dd", "dfn", "dl", "dt", "kbd", "li", "mark", "ol", "p", "pre", "q", "s",
 	"samp", "small", "strike", "sub", "sup", "time", "ul", "var", "address", "article", "aside",
@@ -25,7 +19,7 @@ var elements []string = []string{"b", "em", "i", "strong", "u", "a", "abbr", "bl
 var globalAttributes []string = []string{"class", "dir", "hidden", "id", "lang", "style", "yabeindex", "title", "translate"}
 
 //store attributes will be allowed on relevant element in policy
-var attributes []AllowedAttributesWithElement = []AllowedAttributesWithElement{
+var attributesWithElement []AllowedAttributesWithElement = []AllowedAttributesWithElement{
 	{Element: "a", Attributes: []string{"href", "rel", "hreflang", "name"}},
 	{Element: "abbr", Attributes: []string{"title"}},
 	{Element: "blockquote", Attributes: []string{"cite"}},
@@ -53,9 +47,4 @@ var protocol_schemes []string = []string{"ftp", "http", "https", "mailto"}
 //store protocols will be allowed in attributes on relevant element in policy
 
 //store tagName recognization for element with allowed only 2 protocol http and https
-var tagNames []tagNameReg = []tagNameReg{
-	{"<q ", "</q>"},
-	{"<blockquote", "</blockquote>"},
-	{"<del", "</del>"},
-	{"<img", "/>"},
-	{"<ins", "</ins>"}}
+var tagNameWithTwoProtocols []string = []string{"q", "blockquote", "del", "ins"}

@@ -15,19 +15,13 @@ func GetHTMLPolicy() *bluemonday.Policy {
 func init() {
 	htmlPolicy = bluemonday.NewPolicy()
 	//allow elements
-	for i := 0; i < len(elements); i++ {
-		// log.Println("allows element", elements[i])  //for debug
-		htmlPolicy.AllowElements(elements[i])
-	}
-
+	htmlPolicy.AllowElements(elements...)
 	//allow global attributes
-	for i := 0; i < len(globalAttributes); i++ {
-		htmlPolicy.AllowAttrs(globalAttributes[i]).Globally()
-	}
+	htmlPolicy.AllowAttrs(globalAttributes...).Globally()
 
-	for j := 0; j < len(attributes); j++ {
-		for k := 0; k < len(attributes[j].Attributes); k++ {
-			htmlPolicy.AllowAttrs(attributes[j].Attributes[k]).OnElements(attributes[j].Element)
+	for _, attrs := range attributesWithElement {
+		for _, attr := range attrs.Attributes {
+			htmlPolicy.AllowAttrs(attr).OnElements(attrs.Element)
 			// log.Println("allows attr",attributes[j].Attributes[k], " on element ", attributes[j].Element) //for debug
 		}
 	}
@@ -41,11 +35,11 @@ func init() {
 	htmlPolicy.AllowDocType(true)
 
 	//special case to set protocols allowed for tag p
-	htmlPolicy.AllowAttrs("cite").Matching(regexp.MustCompile(protocol_regexp)).OnElements("q", "blockquote", "del", "ins")
+	htmlPolicy.AllowAttrs("cite").Matching(regexp.MustCompile(protocol_regexp)).OnElements(tagNameWithTwoProtocols...)
 	htmlPolicy.AllowAttrs("src").Matching(regexp.MustCompile(protocol_regexp)).OnElements("img")
 	//allow more protocols in URL schemes
-	for i := 0; i < len(protocol_schemes); i++ {
-		htmlPolicy.AllowURLSchemes(protocol_schemes[i])
+	for _, protocol := range protocol_schemes {
+		htmlPolicy.AllowURLSchemes(protocol)
 		// log.Println("allows protocol ",protocols[0].Protocols[i]) //for debug
 	}
 

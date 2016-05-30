@@ -16,18 +16,20 @@ type CssPolicy struct {
 
 var cssPolicy CssPolicy
 
+func array_copy(arr []string) []string {
+	newArr := make([]string, len(arr))
+	copy(newArr, arr)
+
+	return newArr
+}
+
 func init() {
-	cssPolicy.PrefixAllowed = make([]string, len(CssPropertyPrefix))
+	cssPolicy.PrefixAllowed = array_copy(CssPropertyPrefix)
 	cssPolicy.PropertiesWithPrefix = make(map[string]([]string))
-	cssPolicy.NormalProperties = make([]string, len(NormalCssProperties))
-	cssPolicy.PropertiesWithPrefix["-moz-"] = make([]string, len(MozPrefixProperties))
-	cssPolicy.PropertiesWithPrefix["-ms-"] = make([]string, len(MsPrefixProperties))
-	cssPolicy.PropertiesWithPrefix["-webkit-"] = make([]string, len(WebkitPrefixProperties))
-	copy(cssPolicy.PrefixAllowed, CssPropertyPrefix)
-	copy(cssPolicy.PropertiesWithPrefix["-moz-"], MozPrefixProperties)
-	copy(cssPolicy.PropertiesWithPrefix["-ms-"], MsPrefixProperties)
-	copy(cssPolicy.PropertiesWithPrefix["-webkit-"], WebkitPrefixProperties)
-	copy(cssPolicy.NormalProperties, NormalCssProperties)
+	cssPolicy.PropertiesWithPrefix["-moz-"] = array_copy(MozPrefixProperties)
+	cssPolicy.PropertiesWithPrefix["-ms-"] = array_copy(MsPrefixProperties)
+	cssPolicy.PropertiesWithPrefix["-webkit-"] = array_copy(WebkitPrefixProperties)
+	cssPolicy.NormalProperties = array_copy(NormalCssProperties)
 }
 
 //Get CSS Policy
@@ -56,6 +58,7 @@ func (p *CssPolicy) Sanitize(htmlIn string) string {
 }
 
 func (p *CssPolicy) sanitizeCSSOfHTMLNode(node *html.Node) *html.Node {
+	//checking style of each node and each child recursively
 	if node.Type == html.ElementNode {
 		var Attrs []html.Attribute
 		for _, attr := range node.Attr {
@@ -69,7 +72,6 @@ func (p *CssPolicy) sanitizeCSSOfHTMLNode(node *html.Node) *html.Node {
 		node.Attr = Attrs
 
 	}
-
 	for child := node.FirstChild; child != nil; child = child.NextSibling {
 		child = p.sanitizeCSSOfHTMLNode(child)
 	}
@@ -78,74 +80,104 @@ func (p *CssPolicy) sanitizeCSSOfHTMLNode(node *html.Node) *html.Node {
 }
 
 func (p *CssPolicy) validateStyle(style string) string {
+	//split style to declaration blocks
 	styleArray := strings.Split(style, ";")
 
 	var styleSanitized string = ""
 
-	for i := 0; i < len(styleArray); i++ {
+	for _, styleEach := range styleArray {
 		var buffer bytes.Buffer
-		//trim space and begin and end
 
-		var styleEach string = strings.TrimSpace(styleArray[i])
+		//trim trailing space
+		styleEach = strings.TrimSpace(styleEach)
+
+		//take comment out
+		p.takeCommentOut(styleEach, buffer)
 
 		//no declaration found this string
 		if !strings.Contains(styleEach, ":") {
-
 			continue
 		}
-
-		//take comment out
-		for {
-			commentStart := strings.Index(styleEach, "/*")
-			if commentStart == -1 {
-				break
-			}
-			commentEnd := strings.Index(styleEach[commentStart:], "*/") + 2
-			buffer.WriteString(" " + styleEach[commentStart:commentEnd] + " ")
-			styleEach = styleEach[commentEnd+1:]
-		}
-
-		styleEach = strings.TrimSpace(styleEach)
-
-		//seperate property and value
+		//separate property and value
 		arr := strings.Split(styleEach, ":")
-		//check for valid declaration
+		//check for valid declaration, arr should contain only 2 element, property and value
 		if len(arr) > 2 {
 			continue
 		}
+		//get valid value
 		v := strings.Split(arr[1], " ")
-		val := v[0]
+		value := v[0]
 
-		//valid property
+		//get valid property
 		k := strings.Split(arr[0], " ")
 		property := k[len(k)-1]
 
-		if string(property[0]) == "-" {
-			for i := 0; i < len((*p).PrefixAllowed); i++ {
-				prefix := (*p).PrefixAllowed[i]
-				if property[:len(prefix)] == prefix {
-
-					arrSearch := (*p).PropertiesWithPrefix[prefix]
-					postfixProperty := property[len(prefix):]
-					index := sort.SearchStrings(arrSearch, postfixProperty)
-					if index < len(arrSearch) && arrSearch[index] == postfixProperty {
-						buffer.WriteString(property + ":" + val + ";")
-						styleSanitized += buffer.String()
-					}
-				}
-			}
-
-		} else {
-			arrSearch := (*p).NormalProperties
-			index := sort.SearchStrings(arrSearch, property)
-
-			if index < len(arrSearch) && arrSearch[index] == property {
-				buffer.WriteString(property + ":" + val + ";")
-				styleSanitized += buffer.String()
-			}
+		//check if property in the list and add to sanitized style if match
+		if found, styleString := p.searchProperty(property, value, buffer); found {
+			styleSanitized += styleString
 		}
 
 	}
 
 	return styleSanitized
+}
+
+/*style declaration example:
+style="width:91px;-moz-font-style:italic"
+propety "width" will be seach in list of NormalProperties
+property "-moz-" will be search in list of MozPrefixProperties
+*/
+func (p *CssPolicy) searchProperty(property string, value string, buffer bytes.Buffer) (bool, string) {
+	//check whether style with prefix -moz-, -ms-, -webkit- or normal to get the
+	//relevant list for search
+	if string(property[0]) == "-" {
+		for _, prefix := range (*p).PrefixAllowed {
+			if property[:len(prefix)] == prefix {
+				arrSearch := (*p).PropertiesWithPrefix[prefix]
+				postfixProperty := property[len(prefix):]
+
+				// search among list of postfix to find the match, if match stores this style declaration
+				index := sort.SearchStrings(arrSearch, postfixProperty)
+				if index < len(arrSearch) && arrSearch[index] == postfixProperty {
+					buffer.WriteString(property + ":" + value + ";")
+					return true, buffer.String()
+				}
+			}
+		}
+
+	} else {
+		// search among list of properties to find the match, if match stores this style declaration
+		arrSearch := (*p).NormalProperties
+		index := sort.SearchStrings(arrSearch, property)
+
+		if index < len(arrSearch) && arrSearch[index] == property {
+			buffer.WriteString(property + ":" + value + ";")
+			return true, buffer.String()
+		}
+	}
+
+	return false, ""
+}
+
+// "/*font-size:13pt*/font-style:italic;" will become "font-style:italic" and comment stored in buffer
+
+func (p *CssPolicy) takeCommentOut(style string, buffer bytes.Buffer) string {
+	//take comment out from style string to buffer
+	for {
+		commentStart := strings.Index(style, "/*")
+		if commentStart == -1 {
+			break
+		}
+
+		commentEnd := strings.Index(style[commentStart:], "*/")
+		if commentEnd == -1 {
+			break
+		}
+		commentEnd += 2
+		buffer.WriteString(style[commentStart:commentEnd])
+		style = style[commentEnd+1:]
+	}
+
+	style = strings.TrimSpace(style)
+	return style
 }
