@@ -20,7 +20,7 @@ func TestEliminateUnallowedElement(t *testing.T) {
 func TestEliminateUnallowedAttribute(t *testing.T) {
 	spec := gspec.New(t)
 	input := `<table border="1" cellpadding="1" cellspacing="1" style="width:500px;">
-    <tbody>
+   <tbody>
         <tr>
             <td>a</td>
             <td>b</td>  
@@ -37,7 +37,7 @@ func TestEliminateUnallowedAttribute(t *testing.T) {
 </table>`
 
 	output := `<table border="1" cellpadding="1" cellspacing="1" style="width:500px;">
-    <tbody>
+   <tbody>
         <tr>
             <td>a</td>
             <td>b</td>  
@@ -72,6 +72,7 @@ func TestEliminateUnallowedAttribute(t *testing.T) {
 	spec.Expect(Sanitize(input)).ToNotEqual(unexpected_output)
 
 }
+
 func TestEliminateUnallowedProtocol(t *testing.T) {
 	spec := gspec.New(t)
 	input := `<table border="1" cellpadding="1" cellspacing="1" style="width:500px;">
