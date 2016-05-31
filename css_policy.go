@@ -60,7 +60,7 @@ func (p *CssPolicy) Sanitize(htmlIn string) string {
 		htmlOut += buffer.String()
 
 	}
-	return strings.TrimSpace(htmlOut)
+	return htmlOut
 }
 
 func (p *CssPolicy) sanitizeCSSOfHTMLNode(node *html.Node) *html.Node {
