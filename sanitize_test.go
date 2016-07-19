@@ -5,6 +5,13 @@ import (
 	"testing"
 )
 
+func TestCssParsing(t *testing.T) {
+  spec := gspec.New(t)
+  input := `<p style="text-align: center"><span style="font-size:10px"><span style="font-family:comic sans ms,cursive"><strong>hello</strong></span></span></p>`
+  output := `<p style="text-align:center;"><span style="font-size:10px;"><span style="font-family:comic sans ms,cursive;"><strong>hello</strong></span></span></p>`
+  spec.Expect(Sanitize(input)).ToEqual(output)
+}
+
 func TestEliminateUnallowedElement(t *testing.T) {
 	spec := gspec.New(t)
 	input := `<h2 style="font-style:italic;">review<sub>snsd</sub></h2>

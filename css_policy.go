@@ -111,12 +111,10 @@ func (p *CssPolicy) validateStyle(style string) string {
 			continue
 		}
 		//get valid value
-		v := strings.Split(arr[1], " ")
-		value := v[0]
+		value := strings.TrimSpace(arr[1])
 
 		//get valid property
-		k := strings.Split(arr[0], " ")
-		property := k[len(k)-1]
+		property := strings.TrimSpace(arr[0])
 
 		//check if property in the list and add to sanitized style if match
 		if found, styleString := p.searchProperty(property, value, buffer); found {
