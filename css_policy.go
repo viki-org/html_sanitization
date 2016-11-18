@@ -120,18 +120,23 @@ func (p *CssPolicy) validateStyle(style string) string {
 		if found, styleString := p.searchProperty(property, value, buffer); found {
 			styleSanitized += styleString
 		}
-
 	}
 
 	return styleSanitized
 }
 
-/*style declaration example:
-style="width:91px;-moz-font-style:italic"
-propety "width" will be seach in list of NormalProperties
-property "-moz-" will be search in list of MozPrefixProperties
-*/
+/*
+ * style declaration example:
+ *
+ * 	 style="width:91px;-moz-font-style:italic"
+ * 	 property "width" will be seach in list of NormalProperties
+ * 	 property "-moz-" will be search in list of MozPrefixProperties
+ */
 func (p *CssPolicy) searchProperty(property string, value string, buffer bytes.Buffer) (bool, string) {
+	if value == "" || property == "" {
+		return false, ""
+	}
+
 	//check whether style with prefix -moz-, -ms-, -webkit- or normal to get the
 	//relevant list for search
 	if string(property[0]) == "-" {
