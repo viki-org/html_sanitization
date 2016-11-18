@@ -14,7 +14,7 @@ func TestCssParsing(t *testing.T) {
 
 func TestEliminateUnallowedElement(t *testing.T) {
 	spec := gspec.New(t)
-	input := `<h2 style="font-style:italic;">review<sub>snsd</sub></h2>
+	input := `<h2 style="font-style:italic;:empty-property ;:;empty-value:;;">review<sub>snsd</sub></h2>
 <p><script>function funct() {}</script></p>`
 	output := `<h2 style="font-style:italic;">review<sub>snsd</sub></h2>
 <p></p>`
